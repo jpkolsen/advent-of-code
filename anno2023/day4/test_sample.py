@@ -7,8 +7,8 @@ LINES = Path(__file__).parent.joinpath("sample_input.txt").read_text().splitline
 
 
 def test_part_one():
-    assert part_one(LINES) == 0
+    assert part_one(LINES) == 13
 
 
 def test_part_two():
-    assert part_two(LINES) == 0
+    assert part_two(LINES) == 30
