@@ -36,7 +36,7 @@ def part_one(lines: list[str]) -> int:
 
 
 def part_two(lines: list[str]) -> int:
-    entries: Tuple[Dict] = tuple({"copies": 1} for _ in lines)
+    entries = tuple({"copies": 1} for _ in lines)
     for i, line in enumerate(lines):
         card = parse_card(line)
         if card.matches == 0:
@@ -50,4 +50,5 @@ def part_two(lines: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    print(part_two(LINES))
+    print("Part one:", part_one(LINES))
+    print("Part two:", part_two(LINES))

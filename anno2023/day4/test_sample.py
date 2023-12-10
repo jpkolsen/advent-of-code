@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 
-from anno2023.day4.solution import part_one, part_two
+from .solution import part_one, part_two
 
 LINES = Path(__file__).parent.joinpath("sample_input.txt").read_text().splitlines()
 
