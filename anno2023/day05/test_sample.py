@@ -3,15 +3,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from anno2023.day05.solution import (
-    Map,
-    MapRange,
-    convert_multiple_maps,
-    parse_input,
-    part_one,
-    part_two,
-)
-from anno2023.day05.numpy_solution import get_seed_array, part_two_numpy
+from anno2023.day05.solution import (Map, MapRange, convert_multiple_maps,
+                                     parse_input, part_one, part_two,
+                                     split_range_by_overlap)
 
 INPUT_FILE = Path(__file__).parent.joinpath("sample_input.txt")
 
@@ -56,33 +50,74 @@ def test_multiple_maps_convert(source: int, dest: int):
     assert convert_multiple_maps(source, maps) == dest
 
 
-def test_get_seed_array():
-    values = [5, 2, 10, 3]
-    assert all(get_seed_array(values) == np.array([5, 6, 10, 11, 12]))
+# def test_get_seed_array():
+#     values = [5, 2, 10, 3]
+#     assert all(get_seed_array(values) == np.array([5, 6, 10, 11, 12]))
+ 
 
+# def test_convert_array():
+#     from anno2023.day05.numpy_solution import RangeMap
 
-def test_convert_array():
-    from anno2023.day05.numpy_solution import RangeMap
+#     range_map = RangeMap(5, 10, 2)
+#     array = np.array(range(4, 8), dtype="int")
+#     assert all(np.union1d(*range_map.convert_array(array)) == np.array([4, 7, 10, 11]))
 
-    range_map = RangeMap(5, 10, 2)
-    array = np.array(range(4, 8), dtype="int")
-    assert all(np.union1d(*range_map.convert_array(array)) == np.array([4, 7, 10, 11]))
+#     array = np.array(range(4, 13))
+#     assert all(
+#         np.union1d(*range_map.convert_array(array))
+#         == np.array([4, 7, 8, 9, 10, 11, 12])
+#     )
+ 
+ 
+# def test_convert_multiple_range_array():
+#     from anno2023.day05.numpy_solution import Map, RangeMap
 
-    array = np.array(range(4, 13))
-    assert all(
-        np.union1d(*range_map.convert_array(array))
-        == np.array([4, 7, 8, 9, 10, 11, 12])
-    )
+#     maps = Map(range_maps=[RangeMap(5, 10, 2), RangeMap(15, 20, 2)])
+#     array = np.array(range(4, 16))
+#     assert all(
+#         maps.convert_array(array) == np.array([4, 7, 8, 9, 10, 11, 12, 13, 14, 20])
+#     )
 
+def test_get_overlap():
+    # Overlap in middle
+    range1 = range(0,10)
+    range2 = range(4,6)
+    assert [(r.start, r.stop) for r in (range(0,4), range(4,6), range(6, 10))] == [(r.start, r.stop) for r in split_range_by_overlap(range1, range2)]
 
-def test_convert_multiple_range_array():
-    from anno2023.day05.numpy_solution import Map, RangeMap
+    # Overlap at upper end
+    range1 = range(0, 6)
+    range2 = range(4, 10)
+    assert [(r.start, r.stop) for r in (range(0,4), range(4,6), range(0, 0))] == [(r.start, r.stop) for r in split_range_by_overlap(range1, range2)]
 
-    maps = Map(range_maps=[RangeMap(5, 10, 2), RangeMap(15, 20, 2)])
-    array = np.array(range(4, 16))
-    assert all(
-        maps.convert_array(array) == np.array([4, 7, 8, 9, 10, 11, 12, 13, 14, 20])
-    )
+    # No overlap (lower)
+    range1 = range(0,4)
+    range2 = range(6, 10)
+    assert [(r.start, r.stop) for r in (range(0,4), range(0,0), range(0, 0))] == [(r.start, r.stop) for r in split_range_by_overlap(range1, range2)]
+
+    # No overlap (over)
+    range1 = range(6, 10)
+    range2 = range(0, 6)
+    assert [(r.start, r.stop) for r in (range(0,0), range(0,0), range(6, 10))] == [(r.start, r.stop) for r in split_range_by_overlap(range1, range2)]
+
+    # Overlap at lower end
+    range1 = range(4, 10)
+    range2 = range(0, 6)
+    assert [(r.start, r.stop) for r in (range(0,0), range(4,6), range(6, 10))] == [(r.start, r.stop) for r in split_range_by_overlap(range1, range2)]
+
+    # Full overlap
+    range1 = range(4, 6)
+    range2 = range(0, 10)
+    assert [(r.start, r.stop) for r in (range(0,0), range(4,6), range(0, 0))] == [(r.start, r.stop) for r in split_range_by_overlap(range1, range2)]
+
+def test_convert_range():
+    map_range = MapRange(source_start=4, dest_start=6, range_length=10)
+    assert map_range.convert_range(range(4, 6)) == range(6, 8)
+
+    with pytest.raises(ValueError):
+        map_range.convert_range(range(0, 10))
+
+    with pytest.raises(ValueError):
+        map_range.convert_range(range(4, 15))
 
 
 def test_part_one():
@@ -98,8 +133,4 @@ if __name__ == "__main__":
 
     start_time = time.time()
     print(part_two(INPUT_FILE))
-    print(f"Executed in {(time.time() - start_time)*1000} ms")
-
-    start_time = time.time()
-    print(part_two_numpy(INPUT_FILE))
     print(f"Executed in {(time.time() - start_time)*1000} ms")

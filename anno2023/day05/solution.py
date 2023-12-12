@@ -15,12 +15,12 @@ class PropertyRange:
     length: int
 
     @property
-    def end(self) -> int:
+    def stop(self) -> int:
         return self.start + self.length
 
     @property
-    def index_range(self):
-        return range(self.start, self.end)
+    def as_range(self):
+        return range(self.start, self.stop)
 
 
 @dataclass
@@ -34,8 +34,8 @@ class MapRange:
         return self.source_start + self.range_length
 
     @property
-    def conversion(self) -> int:
-        return self.dest_start - self.source_start
+    def as_range(self) -> range:
+        return range(self.source_start, self.source_end)
 
     def __contains__(self, number: int) -> bool:
         return True if number in range(self.source_start, self.source_end) else False
@@ -44,6 +44,11 @@ class MapRange:
         if number in self:
             return self.dest_start + (number - self.source_start)
         return number
+
+    def convert_range(self, range_in: range) -> range:
+        if not (range_in.start in self and range_in.stop in self):
+            raise ValueError
+        return range(self.convert(range_in.start), self.convert(range_in.stop))
 
 
 @dataclass
@@ -96,6 +101,14 @@ def convert_multiple_maps(source: int, maps: List[Map]) -> int:
         number = _map.convert(number)
     return number
 
+def split_range_by_overlap(range1: range, range2: range):
+    """Divide range1 into sub-ranges by their overlap with range2"""
+    range1_below = range(range1.start, min(range2.start, range1.stop)) if range1.start < range2.start else range(0,0)
+    overlap = range(max(range1.start, range2.start), min(range1.stop, range2.stop))
+    overlap = range(0,0) if not overlap else overlap
+    range1_above = range(max(range2.stop, range1.start), range1.stop) if range2.stop < range1.stop else range(0,0)
+    return range1_below, overlap, range1_above
+
 
 def part_one(input_file: Path) -> int:
     seeds, maps = parse_input(input_file)
@@ -108,13 +121,23 @@ def part_one(input_file: Path) -> int:
 def part_two(input_file: Path) -> int:
     seed_input, maps = parse_input(input_file)
 
-    seed_ranges = [
-        PropertyRange(start=seed_input[i - 1], length=seed_input[i])
-        for i, _ in enumerate(seed_input[1:])
-    ]
-    for conversion_map in maps:
-        pass
+    ranges_in = []
+    for i, value in enumerate(seed_input):
+        if not i%2:
+            start = value
+        else:
+            ranges_in.append(PropertyRange(start=start, length=value))
 
+    ranges_out = []
+    for conversion_map in maps:
+        for map_range in conversion_map.map_ranges:
+            for prop_range in ranges_in:
+                below, overlap, above = split_range_by_overlap(range(prop_range.start, prop_range.stop), map_range.as_range)
+                overlap = map_range.convert_range(overlap) if overlap else overlap
+                ranges_out.extend([_range for _range in (below, overlap, above) if _range])
+        ranges_in = ranges_out
+        ranges_out = []
+    return min(r.start for r in ranges_out)
 
 if __name__ == "__main__":
     print("Part one:", part_one(INPUT_FILE))
