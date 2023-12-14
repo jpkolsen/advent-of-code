@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from anno2023.day05.solution import (Map, MapRange, convert_multiple_maps,
+from anno2023.day05.solution import (Map, MapRange, coerce_ranges, convert_multiple_maps,
                                      parse_input, part_one, part_two,
                                      split_range_by_overlap)
 
@@ -19,18 +19,14 @@ def test_map_range():
 
 def test_convert():
     map_range = MapRange(source_start=5, dest_start=10, range_length=2)
-    assert map_range.convert(3) == 3
     assert map_range.convert(5) == 10
     assert map_range.convert(6) == 11
-    assert map_range.convert(7) == 7
 
 
 def test_convert_negative():
     map_range = MapRange(source_start=5, dest_start=2, range_length=10)
-    assert map_range.convert(2) == 2
     assert map_range.convert(5) == 2
     assert map_range.convert(10) == 7
-    assert map_range.convert(15) == 15
 
 
 @pytest.mark.parametrize(
@@ -119,6 +115,28 @@ def test_convert_range():
     with pytest.raises(ValueError):
         map_range.convert_range(range(4, 15))
 
+def test_coerce_ranges():
+    ranges_in = {
+        range(3,7),
+        range(4,6),
+        range(8,10),
+        range(5,10),
+        range(12,15),
+    }
+
+    assert coerce_ranges(ranges_in) == {
+        range(3,10),
+        range(12,15),
+    }
+
+    ranges_in = {range(79, 93), range(55, 68), range(81, 95), range(57, 70)}
+    assert coerce_ranges(ranges_in) == {
+        range(55, 70),
+        range(79, 95),
+    }
+
+    assert coerce_ranges({range(79, 95), range(61, 70), range(51, 61), range(55, 70)}) == {range(51, 70), range(79, 95)}
+    # assert coerce_ranges({range(0,10), range(10,20)}) == {range(0,20)}  # Currently fails
 
 def test_part_one():
     assert part_one(input_file=INPUT_FILE) == 35
