@@ -10,20 +10,6 @@ INPUT_FILE = Path(__file__).parent.joinpath("input.txt")
 
 
 @dataclass
-class PropertyRange:
-    start: int
-    length: int
-
-    @property
-    def stop(self) -> int:
-        return self.start + self.length
-
-    @property
-    def as_range(self):
-        return range(self.start, self.stop)
-
-
-@dataclass
 class MapRange:
     source_start: int
     dest_start: int
@@ -105,34 +91,7 @@ def split_range_by_overlap(range1: range, range2: range):
         if range2.stop < range1.stop
         else range(0, 0)
     )
-    return range1_below, overlap, range1_above
-
-
-def coerce_ranges(ranges: List[range]) -> List[range]:
-    ranges = set(ranges)
-    ranges_out = set()
-    while ranges:
-        overlap_found = False
-        ref_range = ranges.pop()
-        if not ranges:
-            ranges_out.add(ref_range)
-            break
-        for compare_range in ranges:
-            overlap = split_range_by_overlap(ref_range, compare_range)[1]
-            if overlap:
-                ranges.add(
-                    range(
-                        min(ref_range.start, compare_range.start),
-                        max(ref_range.stop, compare_range.stop),
-                    )
-                )
-                if overlap not in (ref_range, compare_range):
-                    ranges.remove(compare_range)
-                overlap_found = True
-                break
-        if not overlap_found:
-            ranges_out.add(ref_range)
-    return list(ranges_out)
+    return overlap, (range1_below, range1_above)
 
 
 def part_one(input_file: Path) -> int:
@@ -143,6 +102,32 @@ def part_one(input_file: Path) -> int:
     return min(locations)
 
 
+class Convertor:
+    def __init__(self, maps: List[Map]):
+        self.maps = maps
+        self.lowest_value = np.inf
+
+    def convert_range(self, _range: range, maps: List[Map]) -> None:
+        while maps:
+            _map = maps.pop()
+
+            for map_range in _map.map_ranges:
+                overlap, non_overlap = split_range_by_overlap(
+                    _range, map_range.as_range
+                )
+                if overlap:
+                    self.convert_range(map_range.convert_range(overlap), maps)
+                    if not any(non_overlap):
+                        return
+                    _range = non_overlap[0]
+                    if all(non_overlap):
+                        self.convert_range(non_overlap[1], maps)
+
+            self.convert_range(_range, maps)
+        self.lowest_value = min(self.lowest_value, _range.start)
+        print(self.lowest_value)
+
+
 def part_two(input_file: Path) -> int:
     seed_input, maps = parse_input(input_file)
 
@@ -151,33 +136,14 @@ def part_two(input_file: Path) -> int:
         if not i % 2:
             start = value
         else:
-            ranges.append(PropertyRange(start=start, length=value).as_range)
+            ranges.append(range(start, value + 1))
 
     import time
 
-    for conversion_map in maps:
-        start_time = time.time()
-        print(conversion_map.title)
-        ranges_out = []
-
-        for prop_range in ranges:
-            overlap_found = False
-            for map_range in conversion_map.map_ranges:
-                below, overlap, above = split_range_by_overlap(
-                    prop_range, map_range.as_range
-                )
-
-                non_overlaps = [r for r in (below, above) if r]
-                if overlap:
-                    overlap = map_range.convert_range(overlap)
-                    ranges_out.append(overlap)
-                    ranges.extend(non_overlaps)
-                    overlap_found = True
-            if not overlap_found:
-                ranges_out.extend(non_overlaps)
-        ranges = coerce_ranges(ranges_out)
-        print("Converted in", time.time() - start_time)
-    return min(r.start for r in ranges)
+    convertor = Convertor(maps)
+    for _range in ranges:
+        convertor.convert_range(_range, maps.copy())
+    return convertor.lowest_value
 
 
 if __name__ == "__main__":

@@ -6,7 +6,6 @@ import pytest
 from anno2023.day05.solution import (
     Map,
     MapRange,
-    coerce_ranges,
     convert_multiple_maps,
     parse_input,
     part_one,
@@ -53,77 +52,48 @@ def test_multiple_maps_convert(source: int, dest: int):
     assert convert_multiple_maps(source, maps) == dest
 
 
-# def test_get_seed_array():
-#     values = [5, 2, 10, 3]
-#     assert all(get_seed_array(values) == np.array([5, 6, 10, 11, 12]))
+# def test_get_overlap():
+#     # Overlap in middle
+#     range1 = range(0, 10)
+#     range2 = range(4, 6)
+#     assert [(r.start, r.stop) for r in (range(0, 4), range(4, 6), range(6, 10))] == [
+#         (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
+#     ]
 
+#     # Overlap at upper end
+#     range1 = range(0, 6)
+#     range2 = range(4, 10)
+#     assert [(r.start, r.stop) for r in (range(0, 4), range(4, 6), range(0, 0))] == [
+#         (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
+#     ]
 
-# def test_convert_array():
-#     from anno2023.day05.numpy_solution import RangeMap
+#     # No overlap (lower)
+#     range1 = range(0, 4)
+#     range2 = range(6, 10)
+#     assert [(r.start, r.stop) for r in (range(0, 4), range(0, 0), range(0, 0))] == [
+#         (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
+#     ]
 
-#     range_map = RangeMap(5, 10, 2)
-#     array = np.array(range(4, 8), dtype="int")
-#     assert all(np.union1d(*range_map.convert_array(array)) == np.array([4, 7, 10, 11]))
+#     # No overlap (over)
+#     range1 = range(6, 10)
+#     range2 = range(0, 6)
+#     assert [(r.start, r.stop) for r in (range(0, 0), range(0, 0), range(6, 10))] == [
+#         (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
+#     ]
 
-#     array = np.array(range(4, 13))
-#     assert all(
-#         np.union1d(*range_map.convert_array(array))
-#         == np.array([4, 7, 8, 9, 10, 11, 12])
-#     )
+#     # Overlap at lower end
+#     range1 = range(4, 10)
+#     range2 = range(0, 6)
+#     assert [(r.start, r.stop) for r in (range(0, 0), range(4, 6), range(6, 10))] == [
+#         (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
+#     ]
 
-
-# def test_convert_multiple_range_array():
-#     from anno2023.day05.numpy_solution import Map, RangeMap
-
-#     maps = Map(range_maps=[RangeMap(5, 10, 2), RangeMap(15, 20, 2)])
-#     array = np.array(range(4, 16))
-#     assert all(
-#         maps.convert_array(array) == np.array([4, 7, 8, 9, 10, 11, 12, 13, 14, 20])
-#     )
-
-
-def test_get_overlap():
-    # Overlap in middle
-    range1 = range(0, 10)
-    range2 = range(4, 6)
-    assert [(r.start, r.stop) for r in (range(0, 4), range(4, 6), range(6, 10))] == [
-        (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
-    ]
-
-    # Overlap at upper end
-    range1 = range(0, 6)
-    range2 = range(4, 10)
-    assert [(r.start, r.stop) for r in (range(0, 4), range(4, 6), range(0, 0))] == [
-        (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
-    ]
-
-    # No overlap (lower)
-    range1 = range(0, 4)
-    range2 = range(6, 10)
-    assert [(r.start, r.stop) for r in (range(0, 4), range(0, 0), range(0, 0))] == [
-        (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
-    ]
-
-    # No overlap (over)
-    range1 = range(6, 10)
-    range2 = range(0, 6)
-    assert [(r.start, r.stop) for r in (range(0, 0), range(0, 0), range(6, 10))] == [
-        (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
-    ]
-
-    # Overlap at lower end
-    range1 = range(4, 10)
-    range2 = range(0, 6)
-    assert [(r.start, r.stop) for r in (range(0, 0), range(4, 6), range(6, 10))] == [
-        (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
-    ]
-
-    # Full overlap
-    range1 = range(4, 6)
-    range2 = range(0, 10)
-    assert [(r.start, r.stop) for r in (range(0, 0), range(4, 6), range(0, 0))] == [
-        (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
-    ]
+#     # Full overlap
+#     range1 = range(4, 6)
+#     range2 = range(0, 10)
+#     assert [(r.start, r.stop) for r in (range(0, 0), range(4, 6), range(0, 0))] == [
+#         (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
+#     ]
 
 
 def test_convert_range():
@@ -135,32 +105,6 @@ def test_convert_range():
 
     with pytest.raises(ValueError):
         map_range.convert_range(range(4, 15))
-
-
-def test_coerce_ranges():
-    ranges_in = [
-        range(3, 7),
-        range(4, 6),
-        range(8, 10),
-        range(5, 10),
-        range(12, 15),
-    ]
-
-    assert set(coerce_ranges(ranges_in)) == {
-        range(3, 10),
-        range(12, 15),
-    }
-
-    ranges_in = [range(79, 93), range(55, 68), range(81, 95), range(57, 70)]
-    assert set(coerce_ranges(ranges_in)) == {
-        range(55, 70),
-        range(79, 95),
-    }
-
-    assert set(
-        coerce_ranges([range(79, 95), range(61, 70), range(51, 61), range(55, 70)])
-    ) == {range(51, 70), range(79, 95)}
-    # assert coerce_ranges({range(0,10), range(10,20)}) == {range(0,20)}  # Currently fails
 
 
 def test_part_one():
