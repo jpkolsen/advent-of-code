@@ -52,48 +52,48 @@ def test_multiple_maps_convert(source: int, dest: int):
     assert convert_multiple_maps(source, maps) == dest
 
 
-# def test_get_overlap():
-#     # Overlap in middle
-#     range1 = range(0, 10)
-#     range2 = range(4, 6)
-#     assert [(r.start, r.stop) for r in (range(0, 4), range(4, 6), range(6, 10))] == [
-#         (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
-#     ]
+def test_get_overlap():
+    # Overlap in middle
+    range1 = range(0, 10)
+    range2 = range(4, 6)
+    assert (range(4, 6), (range(0, 4), range(6, 10))) == split_range_by_overlap(
+        range1, range2
+    )
 
-#     # Overlap at upper end
-#     range1 = range(0, 6)
-#     range2 = range(4, 10)
-#     assert [(r.start, r.stop) for r in (range(0, 4), range(4, 6), range(0, 0))] == [
-#         (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
-#     ]
+    # Overlap at upper end
+    range1 = range(0, 6)
+    range2 = range(4, 10)
+    assert (range(4, 6), (range(0, 4), range(0, 0))) == split_range_by_overlap(
+        range1, range2
+    )
 
-#     # No overlap (lower)
-#     range1 = range(0, 4)
-#     range2 = range(6, 10)
-#     assert [(r.start, r.stop) for r in (range(0, 4), range(0, 0), range(0, 0))] == [
-#         (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
-#     ]
+    # No overlap (lower)
+    range1 = range(0, 4)
+    range2 = range(6, 10)
+    assert (range(0, 0), (range(0, 4), range(0, 0))) == split_range_by_overlap(
+        range1, range2
+    )
 
-#     # No overlap (over)
-#     range1 = range(6, 10)
-#     range2 = range(0, 6)
-#     assert [(r.start, r.stop) for r in (range(0, 0), range(0, 0), range(6, 10))] == [
-#         (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
-#     ]
+    # No overlap (over)
+    range1 = range(6, 10)
+    range2 = range(0, 6)
+    assert (range(0, 0), (range(0, 0), range(6, 10))) == split_range_by_overlap(
+        range1, range2
+    )
 
-#     # Overlap at lower end
-#     range1 = range(4, 10)
-#     range2 = range(0, 6)
-#     assert [(r.start, r.stop) for r in (range(0, 0), range(4, 6), range(6, 10))] == [
-#         (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
-#     ]
+    # Overlap at lower end
+    range1 = range(4, 10)
+    range2 = range(0, 6)
+    assert (range(4, 6), (range(0, 0), range(6, 10))) == split_range_by_overlap(
+        range1, range2
+    )
 
-#     # Full overlap
-#     range1 = range(4, 6)
-#     range2 = range(0, 10)
-#     assert [(r.start, r.stop) for r in (range(0, 0), range(4, 6), range(0, 0))] == [
-#         (r.start, r.stop) for r in split_range_by_overlap(range1, range2)
-#     ]
+    # Full overlap
+    range1 = range(4, 6)
+    range2 = range(0, 10)
+    assert (range(4, 6), (range(0, 0), range(0, 0))) == split_range_by_overlap(
+        range1, range2
+    )
 
 
 def test_convert_range():

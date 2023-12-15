@@ -20,6 +20,10 @@ class MapRange:
         return self.source_start + self.range_length
 
     @property
+    def addition(self) -> int:
+        return self.dest_start - self.source_start
+
+    @property
     def as_range(self) -> range:
         return range(self.source_start, self.source_end)
 
@@ -34,7 +38,7 @@ class MapRange:
     def convert_range(self, range_in: range) -> range:
         if not (range_in.start in self and range_in.stop - 1 in self):
             raise ValueError
-        return range(self.convert(range_in.start), self.convert(range_in.stop))
+        return range(range_in.start + self.addition, range_in.stop + self.addition)
 
 
 @dataclass
@@ -91,7 +95,7 @@ def split_range_by_overlap(range1: range, range2: range):
         if range2.stop < range1.stop
         else range(0, 0)
     )
-    return overlap, (range1_below, range1_above)
+    return overlap, [r for r in (range1_below, range1_above) if r]
 
 
 def part_one(input_file: Path) -> int:
@@ -109,6 +113,7 @@ class Convertor:
 
     def convert_range(self, _range: range, maps: List[Map]) -> None:
         while maps:
+            all_maps = maps.copy()
             _map = maps.pop()
 
             for map_range in _map.map_ranges:
@@ -116,16 +121,15 @@ class Convertor:
                     _range, map_range.as_range
                 )
                 if overlap:
-                    self.convert_range(map_range.convert_range(overlap), maps)
-                    if not any(non_overlap):
+                    self.convert_range(map_range.convert_range(overlap), maps.copy())
+                    if not non_overlap:
                         return
                     _range = non_overlap[0]
-                    if all(non_overlap):
-                        self.convert_range(non_overlap[1], maps)
+                    if len(non_overlap) == 2:
+                        self.convert_range(non_overlap[1], all_maps.copy())
 
-            self.convert_range(_range, maps)
+            self.convert_range(_range, maps.copy())
         self.lowest_value = min(self.lowest_value, _range.start)
-        print(self.lowest_value)
 
 
 def part_two(input_file: Path) -> int:
@@ -136,11 +140,12 @@ def part_two(input_file: Path) -> int:
         if not i % 2:
             start = value
         else:
-            ranges.append(range(start, value + 1))
+            ranges.append(range(start, start + value))
 
     import time
 
     convertor = Convertor(maps)
+    maps.reverse()
     for _range in ranges:
         convertor.convert_range(_range, maps.copy())
     return convertor.lowest_value
