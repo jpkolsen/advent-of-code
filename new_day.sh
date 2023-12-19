@@ -22,7 +22,7 @@ else
     done
 
     # Increment the highest number to get the next challenge dayYY
-    day_number=$(printf "%02d" $((highest_number + 1)))
+    day_number=$(printf "%02d" "$((10#$highest_number + 1))")
 
     read -p "Create blank challenge for day$day_number? [y/n]: " response
     if [ "$response" != "y" ]; then
