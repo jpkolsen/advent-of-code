@@ -17,4 +17,9 @@ def test_part_two():
 
 
 if __name__ == "__main__":
+    import time
+
+    start_time = time.time()
     test_part_two()
+
+    print(f"finsihed in {time.time() - start_time} seconds")

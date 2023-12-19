@@ -27,15 +27,20 @@ def part_one(lines: List[str]):
 def part_two(lines: List[str]) -> int:
     steps, elements = parse_lines(lines)
     locations = [x for x in elements.keys() if x.endswith("A")]
-    counter = 0
-    while not all([x.endswith("Z") for x in locations]):
+
+    num_locations = len(locations)
+    counter = 1
+    while True:
         for step in steps:
-            for i, location in enumerate(locations):
-                locations[i] = (
-                    elements[location][0] if step == "L" else elements[location][1]
-                )
+            locations = [
+                elements[location][0] if step == "L" else elements[location][1]
+                for location in locations
+            ]
+            if any(location == "XXX" for location in locations):
+                raise ValueError("XXX")
+            if all(location.endswith("Z") for location in locations):
+                return counter
             counter += 1
-    return counter
 
 
 if __name__ == "__main__":
