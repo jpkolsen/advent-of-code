@@ -14,15 +14,15 @@ class History:
             diffs.append(sequence[i + 1] - sequence[i])
         return diffs
 
-    def compute_layer(self, sequence: List[int]):
+    def compute_layers(self, sequence: List[int]):
         while not all(seq == sequence[0] for seq in sequence):
+            self.layers.append(sequence)
             diffs = self.find_diffs(sequence)
-            self.layers.append(diffs)
-            self.compute_layer(diffs)
-        return sequence[0]
+            sequence = self.compute_layers(diffs)
+        return sequence
 
     def propagate_increase(self, sequence: List[int]):
-        for layer in self.layers:
+        for layer in self.layers[::-1]:
             sequence.append(sequence[-1] + layer[-1])
         return sequence[-1]
 
@@ -32,7 +32,7 @@ def part_one(lines: list[str]) -> int:
     for line in lines:
         sequence = [int(x) for x in line.split()]
         history = History()
-        history.compute_layer(sequence)
+        sequence = history.compute_layers(sequence)
         results.append(history.propagate_increase(sequence))
 
     return sum(results)
