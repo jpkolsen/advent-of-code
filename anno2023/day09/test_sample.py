@@ -10,8 +10,9 @@ def test_part_one():
 
 
 def test_part_two():
-    assert part_two(LINES) == 0
+    assert part_two(LINES) == 2
 
 
 if __name__ == "__main__":
-    test_part_one()
+    part_one(LINES)
+    part_two(LINES)
