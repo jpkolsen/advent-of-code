@@ -2,18 +2,19 @@ from pathlib import Path
 
 from .solution import part_one, part_two
 
-LINES1 = Path(__file__).parent.joinpath("sample_input1.txt").read_text().splitlines()
-LINES2 = Path(__file__).parent.joinpath("sample_input2.txt").read_text().splitlines()
+ARRAYS = []
+for file in [f"sample_input{i}.txt" for i in range(1, 6)]:
+    ARRAYS.append(Path(__file__).parent.joinpath(file).read_text().splitlines())
 
 
 def test_start_pos():
-    array = LINES1
+    array = ARRAYS[0]
     start_pos = [(i, l.find("S")) for i, l in enumerate(array) if l.find("S") > -1]
     assert start_pos == [(1, 1)]
 
     assert array[1][1] == "S"
 
-    array = LINES2
+    array = ARRAYS[1]
     start_pos = [(i, l.find("S")) for i, l in enumerate(array) if l.find("S") > -1]
     assert start_pos == [(2, 0)]
 
@@ -21,13 +22,14 @@ def test_start_pos():
 
 
 def test_part_one():
-    assert part_one(LINES1) == 4
-    assert part_one(LINES2) == 8
+    assert part_one(ARRAYS[0]) == 4
+    assert part_one(ARRAYS[1]) == 8
 
 
 def test_part_two():
-    assert part_two(LINES1) == 0
-    assert part_two(LINES2) == 0
+    assert part_two(ARRAYS[2]) == 4
+    assert part_two(ARRAYS[3]) == 8
+    assert part_two(ARRAYS[4]) == 10
 
 
 if __name__ == "__main__":
